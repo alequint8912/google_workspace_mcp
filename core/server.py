@@ -476,6 +476,12 @@ def configure_server_for_http():
             if config.is_external_oauth21_provider():
                 # External OAuth mode: use custom provider that handles ya29.* access tokens
                 from auth.external_oauth_provider import ExternalOAuthProvider
+                from key_value.aio.stores.memory import MemoryStore
+
+                # Always use MemoryStore to avoid disk writes (required for read-only
+                # filesystems like Vercel). GoogleProvider's parent always needs a
+                # client_storage — without it, it falls back to disk and crashes.
+                external_client_storage = MemoryStore()
 
                 provider = ExternalOAuthProvider(
                     client_id=config.client_id,
@@ -484,10 +490,12 @@ def configure_server_for_http():
                     redirect_path=config.redirect_path,
                     required_scopes=provider_valid_scopes,
                     resource_server_url=config.get_oauth_base_url(),
+                    client_storage=external_client_storage,
+                    jwt_signing_key=jwt_signing_key,
                 )
                 server.auth = provider
 
-                logger.info("OAuth 2.1 enabled with EXTERNAL provider mode")
+                logger.info("OAuth 2.1 enabled with EXTERNAL provider mode (MemoryStore)")
                 logger.info(
                     "Expecting Authorization bearer tokens in tool call headers"
                 )
