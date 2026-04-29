@@ -14,9 +14,5 @@
       "src": "/mcp/(.*)",
       "dest": "/api/index.py"
     }
-  ],
-  "env": {
-    "GOOGLE_OAUTH_CLIENT_ID": "@google-oauth-client-id",
-    "OAUTHLIB_INSECURE_TRANSPORT": "1"
-  }
+  ]
 }
